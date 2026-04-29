@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#1a1a2e"/>
+  <rect x="40" y="40" width="200" height="200" rx="20" fill="#0f3460"/>
+  <rect x="272" y="40" width="200" height="200" rx="20" fill="#0f3460"/>
+  <rect x="40" y="272" width="200" height="200" rx="20" fill="#0f3460"/>
+  <rect x="272" y="272" width="200" height="200" rx="20" fill="#0f3460"/>
+  <!-- Translate arrows icon (top-left) -->
+  <path d="M80 120 h80 M160 120 l-20-20 M160 120 l-20 20" stroke="#4361ee" stroke-width="12" stroke-linecap="round" fill="none"/>
+  <path d="M240 160 h-80 M160 160 l20-20 M160 160 l20 20" stroke="#4361ee" stroke-width="12" stroke-linecap="round" fill="none"/>
+  <!-- Chinese character 文 (top-right) -->
+  <text x="372" y="168" font-family="serif" font-size="110" fill="#4361ee" text-anchor="middle">文</text>
+  <!-- Cangjie key icon (bottom-left) -->
+  <text x="140" y="408" font-family="serif" font-size="80" fill="#4361ee" text-anchor="middle">倉</text>
+  <!-- Settings gear (bottom-right) -->
+  <text x="372" y="408" font-family="serif" font-size="80" fill="#4361ee" text-anchor="middle">頡</text>
+</svg>
