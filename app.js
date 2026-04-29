@@ -201,6 +201,69 @@ function copyTranslation() {
 // ===== Text to Speech =====
 let currentUtterance = null;
 
+// Preferred voice name keywords per language (ordered by preference)
+const preferredVoices = {
+  'en-US': ['Samantha', 'Google US English', 'Microsoft Aria', 'Microsoft Zira', 'Alex', 'Karen', 'en-US'],
+  'zh-TW': ['Meijia', 'Google 國語', 'Microsoft Hanhan', 'zh-TW'],
+  'ja-JP': ['Kyoko', 'Google 日本語', 'ja-JP'],
+  'ko-KR': ['Yuna', 'Google 한국의', 'ko-KR'],
+  'fr-FR': ['Thomas', 'Google français', 'fr-FR'],
+  'de-DE': ['Anna', 'Google Deutsch', 'de-DE'],
+  'es-ES': ['Monica', 'Google español', 'es-ES'],
+  'pt-BR': ['Google português', 'pt-BR'],
+  'ru-RU': ['Milena', 'Google русский', 'ru-RU'],
+  'ar-SA': ['Maged', 'ar-SA'],
+  'th-TH': ['Kanya', 'th-TH'],
+  'vi-VN': ['vi-VN'],
+  'id-ID': ['id-ID'],
+  'nl-NL': ['nl-NL'],
+};
+
+const speechLangMap = {
+  'zh-TW': 'zh-TW', 'en': 'en-US', 'ja': 'ja-JP', 'ko': 'ko-KR',
+  'fr': 'fr-FR', 'de': 'de-DE', 'es': 'es-ES', 'pt': 'pt-BR',
+  'ru': 'ru-RU', 'ar': 'ar-SA', 'th': 'th-TH', 'vi': 'vi-VN',
+  'id': 'id-ID', 'nl': 'nl-NL'
+};
+
+function getBestVoice(bcp47Lang) {
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = preferredVoices[bcp47Lang] || [];
+
+  // 1. Try exact preferred voice name match
+  for (const name of preferred) {
+    const match = voices.find(v => v.name.includes(name) && v.lang.startsWith(bcp47Lang.split('-')[0]));
+    if (match) return match;
+  }
+
+  // 2. Fall back to any voice matching the language
+  return voices.find(v => v.lang === bcp47Lang)
+    || voices.find(v => v.lang.startsWith(bcp47Lang.split('-')[0]))
+    || null;
+}
+
+function doSpeak(text, bcp47Lang, btn, pane) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance._pane = pane;
+  utterance.lang = bcp47Lang;
+  utterance.rate = 0.88;
+  utterance.pitch = 1.0;
+
+  const voice = getBestVoice(bcp47Lang);
+  if (voice) utterance.voice = voice;
+
+  utterance.onstart = () => {
+    btn.classList.add('speaking');
+    currentUtterance = utterance;
+  };
+  utterance.onend = utterance.onerror = () => {
+    btn.classList.remove('speaking');
+    currentUtterance = null;
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
 function speakText(pane) {
   const text = pane === 'source'
     ? document.getElementById('sourceText').value.trim()
@@ -215,47 +278,24 @@ function speakText(pane) {
 
   if (!text) return;
 
-  // If already speaking, stop
+  // Stop if already speaking same pane
   if (window.speechSynthesis.speaking) {
     window.speechSynthesis.cancel();
     document.querySelectorAll('.speak-btn').forEach(b => b.classList.remove('speaking'));
     if (currentUtterance && currentUtterance._pane === pane) return;
   }
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance._pane = pane;
+  const bcp47 = speechLangMap[lang] || lang;
 
-  // Map language codes to BCP-47 for speech
-  const speechLangMap = {
-    'zh-TW': 'zh-TW',
-    'en':    'en-US',
-    'ja':    'ja-JP',
-    'ko':    'ko-KR',
-    'fr':    'fr-FR',
-    'de':    'de-DE',
-    'es':    'es-ES',
-    'pt':    'pt-BR',
-    'ru':    'ru-RU',
-    'ar':    'ar-SA',
-    'th':    'th-TH',
-    'vi':    'vi-VN',
-    'id':    'id-ID',
-    'nl':    'nl-NL'
-  };
-
-  utterance.lang = speechLangMap[lang] || lang;
-  utterance.rate = 0.9;
-
-  utterance.onstart = () => {
-    btn.classList.add('speaking');
-    currentUtterance = utterance;
-  };
-  utterance.onend = utterance.onerror = () => {
-    btn.classList.remove('speaking');
-    currentUtterance = null;
-  };
-
-  window.speechSynthesis.speak(utterance);
+  // Voices may not be loaded yet — wait if needed
+  if (window.speechSynthesis.getVoices().length === 0) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.onvoiceschanged = null;
+      doSpeak(text, bcp47, btn, pane);
+    };
+  } else {
+    doSpeak(text, bcp47, btn, pane);
+  }
 }
 
 // ===== Cangjie Converter =====
