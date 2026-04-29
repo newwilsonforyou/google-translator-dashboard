@@ -299,10 +299,8 @@ body {
   opacity: 0.6;
 }
 
-.clear-btn, .copy-btn {
+.clear-btn, .copy-btn, .speak-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -317,10 +315,43 @@ body {
   opacity: 0.6;
 }
 
-.clear-btn:hover, .copy-btn:hover {
+.clear-btn {
+  top: 12px;
+  right: 12px;
+}
+
+/* source pane: speak sits below clear */
+#speakSourceBtn {
+  top: 52px;
+  right: 12px;
+}
+
+/* target pane: copy on top, speak below */
+.copy-btn {
+  top: 12px;
+  right: 12px;
+}
+
+#speakTargetBtn {
+  top: 52px;
+  right: 12px;
+}
+
+.clear-btn:hover, .copy-btn:hover, .speak-btn:hover {
   opacity: 1;
   color: var(--accent);
   background: var(--bg-primary);
+}
+
+.speak-btn.speaking {
+  opacity: 1;
+  color: #ef4444;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
 }
 
 .char-count {

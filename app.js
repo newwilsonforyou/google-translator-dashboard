@@ -198,6 +198,66 @@ function copyTranslation() {
   copyToClipboard(text, '已複製翻譯結果');
 }
 
+// ===== Text to Speech =====
+let currentUtterance = null;
+
+function speakText(pane) {
+  const text = pane === 'source'
+    ? document.getElementById('sourceText').value.trim()
+    : document.getElementById('targetText').value.trim();
+
+  const lang = pane === 'source'
+    ? document.getElementById('sourceLang').value
+    : document.getElementById('targetLang').value;
+
+  const btnId = pane === 'source' ? 'speakSourceBtn' : 'speakTargetBtn';
+  const btn = document.getElementById(btnId);
+
+  if (!text) return;
+
+  // If already speaking, stop
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    document.querySelectorAll('.speak-btn').forEach(b => b.classList.remove('speaking'));
+    if (currentUtterance && currentUtterance._pane === pane) return;
+  }
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance._pane = pane;
+
+  // Map language codes to BCP-47 for speech
+  const speechLangMap = {
+    'zh-TW': 'zh-TW',
+    'en':    'en-US',
+    'ja':    'ja-JP',
+    'ko':    'ko-KR',
+    'fr':    'fr-FR',
+    'de':    'de-DE',
+    'es':    'es-ES',
+    'pt':    'pt-BR',
+    'ru':    'ru-RU',
+    'ar':    'ar-SA',
+    'th':    'th-TH',
+    'vi':    'vi-VN',
+    'id':    'id-ID',
+    'nl':    'nl-NL'
+  };
+
+  utterance.lang = speechLangMap[lang] || lang;
+  utterance.rate = 0.9;
+
+  utterance.onstart = () => {
+    btn.classList.add('speaking');
+    currentUtterance = utterance;
+  };
+  utterance.onend = utterance.onerror = () => {
+    btn.classList.remove('speaking');
+    currentUtterance = null;
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
 // ===== Cangjie Converter =====
 function setCangjieMode(mode) {
   cangjieMode = mode;
